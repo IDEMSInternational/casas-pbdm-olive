@@ -1,0 +1,16 @@
+{
+    "olive_fly_olive": {
+        "olive_fly_demand": {
+            "parameters": {
+                "AgeOliveFlyPref1": "RapidFruGrow + 350",
+                "OliveFlyOviprate": {
+                    "model": "cossu",
+                    "parameters": [36.0, 0.0185, 0.0145] {36.0*0.0185*Age/power(1.0145,Age)},
+                },
+                "areasearched": "Max(0.01,0.001*OliveFlyAdults*OliveFlySexratio)",
+                "a":  "0.1*(1.0-expo(-areasearched))",
+                "Oflydemand" : "Oflydemand*delkOliveFlyAdult * FFTemperature(tmean,15.0,33.0)*OliveFlySexratio"
+            }
+        }
+    }
+}

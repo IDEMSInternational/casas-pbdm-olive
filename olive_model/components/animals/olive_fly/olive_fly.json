@@ -1,0 +1,271 @@
+{
+    "name": "olive_fly",
+    "display_name": "Olive Fly",
+    "description": "delOliveFly - time span of rOliveFly \n kOliveFly - # of substages for rOliveFly \n pref1 - wdwvec of preference for fruit \n \n ages: \n 0         47.2                210         413     \n |---eggs---|-------larva-------|----pupa----|  Assume 9C threshold\n  \n \n wdwvecs:  (use with OliveFly2dArray ) \n                0     47.2        210  \n                 |-eggs-|---larva--| \n vOliveFlyEgg   1111111100000000000 \n vOliveFlyLarv  0000000011111111111 \n \n               0             75                       575 \n                |---preovip---|----------adults---------| \n \n vOliveFlyPreOv 11111111111111100000000000000000000000000\n vOliveFlyAdult 00000000000000011111111111111111111111111",
+    "growth": {
+        "base_temp": 9.0,
+        "k_bins": 40
+    },
+
+    "sub_populations": {
+        "olive_egg": {
+            "name": "olive_egg",
+            "display_name": "Olive Fly Egg",
+            "description": "",
+            "model": {
+                "type": "basic_delay",
+                "parameters": {
+                    "initial_value": 0,
+                    "del": 47.2
+                },
+                "mass_flows": {
+                    "mortality": {
+                        "type": "mortality_model_1",
+                        "parameters": [0.0, 28.0, 0.0675, 0.384, 0.000667, 30.0]
+                    }
+                }
+                }
+            }
+        },
+ 
+
+        "olive_larva": {
+            "name": "olive_larva",
+            "display_name": "Olive Fly Larva",
+            "description": "",
+            "model": {
+                "type": "basic_delay",
+                "parameters": {
+                    "initial_value": 0,
+                    "del": 159.8
+                },
+                "mass_flows": {
+                    "mortality": {
+                        "type": "mortality_model_1",
+                        "parameters": [0.0, 28.0, 0.0675, 0.384, 0.000667, 30.0]
+                    }
+                } 
+            }
+        },
+
+        "olive_pupa": {
+            "name": "olive_pupa",
+            "display_name": "Olive Fly Pupa",
+            "description": "",
+            "model": {
+                "type": "basic_delay",
+                "parameters": {
+                    "initial_value": 500,
+                    "del": 203.0
+                },
+                "mass_flows": {
+                    "mortality": {
+                        "type": "mortality_model_1",
+                        "parameters": [0.0, 28.0, 0.0675, 0.384, 0.000667, 30.0]
+                    }
+                }
+            }
+        },
+
+        "olive_adult": {
+            "name": "olive_adult",
+            "display_name": "Olive Fly Adult",
+            "description": "",
+            "parameters": {
+                "OliveFlySexRatio": 0.5
+            },
+            
+            "sub_populations": {
+                "olive_adult_preovip": {
+                    "name": "olive_adult_preovip",
+                    "display_name": "Olive Fly PreOvip Adult",
+                    "description": "",
+                    "model": {
+                        "type": "basic_delay",
+                        "parameters": {
+                            "initial_value": 0,
+                            "del": 75.0
+                        },
+                        "mass_flows": {
+                            "mortality": {
+                                "type": "mortality_model_1",
+                                "parameters": [0.0, 28.0, 0.125, 0.384, 0.000667, 30.0]
+                            }
+                        }
+                    }
+                },
+
+                "olive_adult_mature": {
+                    "name": "olive_adult_mature",
+                    "display_name": "Olive Fly Mature Adult",
+                    "description": "",
+                    "model": {
+                        "type": "parallel_delay",
+                        "parameters": {
+                            "rows": 2,
+                            "initial_value": [[0], [500]],
+                            "del": [575.0, 1500.0]
+                        },
+                        "mass_flows": {
+                            "mortality": {
+                                "type": "mortality_model_1",
+                                "parameters": [0.0, 28.0, 0.0675, 0.384, 0.000667, 30.0]
+                            }
+                        }
+                    },
+
+                    "windows": {
+                        "olive_adult_repro": {
+                            "name": "olive_adult_repro",
+                            "display_name": "Olive Fly Reproductive Adult",
+                            "description": "",
+                            "window_def": "(0,:)"
+                        },
+
+                        "olive_adult_dormant": {
+                            "name": "olive_adult_dormant",
+                            "display_name": "Olive Fly Sexually Dormant Adult",
+                            "description": "",
+                            "window_def": "(1,:)"
+                        }
+
+                    },
+
+                    "interactions": {
+                        "dormancy": {
+                            "type": "delay_mass_flow",
+                            "parameters": {
+                                "windows": ["olive_adult_repro", "olive_adult_dormant"],
+                                "ratio": "OFlySDRatio"
+                            } 
+                        },
+                        "dormancy_exit": {
+                            "type": "delay_mass_flow",
+                            "parameters": {
+                                "windows": ["olive_adult_dormant", "olive_adult_repro"],
+                                "ratio": "OFlySDRatio"
+                            } 
+
+                        }
+                    }
+                },
+
+                "olive_adult_diapause": {
+                    "name": "olive_adult_diapause",
+                    "display_name": "Olive Adult Diapause",
+                    "description": "",
+                    "model": {
+                        "type": "static"
+                    }
+                },
+
+                "interactions": {
+                    "adult_to_diapause": {
+                        "type": "linear_flow",
+                        "parameters": {
+                            "windows": ["olive_adult_mature", "olive_adult_diapause"],
+                            "critical_values": {
+                                "day_length": 13.5,
+                                "mean_temp": 17.62
+                            }, 
+                            "variable": "mean_temp",
+                            "coefficients": [-0.1357, 3.2714]
+                        }
+                    }
+                }    
+            },
+
+            "windows": {
+                "olive_adult": {
+                    "name": "olive_adult",
+                    "display_name": "Olive Fly Adult",
+                    "description": "",
+                    "window_def": ["olive_adult_preovip", "olive_adult_repro", "olive_adult_dormant"]
+                }
+            },
+
+            "interactions": {
+                "preovip_to_mature_branch": {
+                    "type": "branch",
+                    "parameters": {
+                        "matrix": [[1], [0]]
+                    }
+                }
+            }         
+        }
+    },
+
+    "windows": {
+        "olive_egg_larva": {
+            "name": "olive_egg_larva",
+            "display_name": "Olive Fly Eggs and Larvae",
+            "description": "",
+            "window_def": ["olive_egg", "olive_larva"]
+        }
+    },
+
+    "interactions": {
+        "egg_to_larva": {
+            "type": "flow",
+            "parameters": {
+                "ratio": 1
+            }
+        },
+
+        "larva_to_pupa": {
+            "type": "flow",
+            "parameters": {
+                "ratio": 1
+            }
+        },
+
+        "pupa_to_preovip": {
+            "type": "flow",
+            "parameters": {
+                "ratio": 1 
+            }
+        }
+    }
+
+    
+    "ini_file": {
+        "CritDaylenOliveFly": 13.4,
+        "OliveFlyimmigprob": 0.8,
+        "OliveFlydurim": 470.0,
+        "OliveFlybakim": 0.1
+    }
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+OFlySprayScalar		:=1.0;
+OFlySprayDelay		:=30; 					//nr days after spray to consider another spray
+
+
+
+for j:=1 to 10 do OflySdArray[j]:=0.05;
+Oflysdk:= 0;
+OflySdAvg:= 0;
+for j:=1 to 10 do 
+    OflySdAvg:=OflySdAvg+OflySdArray[j];
+OflySdAvg:=OflySdAvg/10;
+
+
+
+
+
+
+	
+
